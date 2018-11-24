@@ -67,12 +67,3 @@ mysql -u root -proot -e "GRANT ALL PRIVILEGES ON *.* TO 'root'@'%' IDENTIFIED BY
 sudo /etc/init.d/mysql restart
 
 
-#=============================================================================================================
-# Ending Provisioning
-#=============================================================================================================
-IP=`ip addr show eth0 | grep -Po 'inet \K[\d.]+'`
-
-echo ""
-echo ""
-echo ""
-echo "PHP FPM machine configured with IP: $IP"

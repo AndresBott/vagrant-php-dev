@@ -10,5 +10,11 @@ mounts:
 #    owner: vagrant #defautl
 #    group: vagrant #default
 
+mysqldump:
+  - db_name: db1
+    output: /host_project/db
+  - db_name: db2
+    output: /host_project/db
+
 
 
