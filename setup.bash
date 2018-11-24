@@ -29,9 +29,6 @@ sudo chown -R $USER:$USER /vhosts/$USER/
 sudo chmod -R 750 /vhosts/$USER/
 sudo usermod -a -G $USER www-data
 
-BINDMOUNT="/host_project/ /vhosts/$USER/ none defaults,bind 0 0"
-sudo grep -q -F "$BINDMOUNT" /etc/fstab || echo "$BINDMOUNT" >> /etc/fstab
-sudo mount -a
 
 sudo mkdir -p /vhosts/$USER/public_html
 

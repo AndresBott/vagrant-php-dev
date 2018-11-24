@@ -1,12 +1,14 @@
 ---
 machine_name: php-dev
-main_home_mount: ./shared
-additional_mounts:
-#  - host: ../src
-#    client: public_html/wp-data/themes/my_theme
-##    uid: 1100 # default
-##    gid: 1100 #default
-##    owner: web #defautl
-##    group: web #default
-#
-#
+mounts:
+  - host: ../src
+    client: /host_project
+    loop_mount: /vhosts/web
+#    loop_mount:
+#    uid: 1000 # default
+#    gid: 1000 #default
+#    owner: vagrant #defautl
+#    group: vagrant #default
+
+
+

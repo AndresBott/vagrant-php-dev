@@ -60,37 +60,45 @@ Vagrant.configure("2") do |config|
     #===========================================================================================================
     # Mount folders
     #===========================================================================================================
-    config.vm.synced_folder v_config["main_home_mount"], "/host_project", owner: "web", group: "web", :mount_options => ["uid=1100,gid=1100"]
+    # config.vm.synced_folder v_config["main_home_mount"], "/host_project", owner: "web", group: "web", :mount_options => ["uid=1100,gid=1100"]
 
-    if(v_config["additional_mounts"].kind_of?(Array))
+    loop_mounts = []
+    if(v_config["mounts"].kind_of?(Array))
       $i = 0
-      while $i < v_config["additional_mounts"].length  do
+      while $i < v_config["mounts"].length  do
         mount_defaults = {
             "host"=> nil,
             "client"=>nil,
-            "uid"=>1100,
-            "gid"=>1100,
-            "owner"=>"web",
-            "group"=>"web"
+            "loop_mount"=>nil,
+            "uid"=>1000,
+            "gid"=>1000,
+            "owner"=>"vagrant",
+            "group"=>"vagrant"
         }
         mount_parameters={}
         mount_defaults.each { |key,val|
 
-          if (v_config["additional_mounts"][$i][key].nil?)
+          if (v_config["mounts"][$i][key].nil?)
             mount_parameters[key] = val
           else
-            mount_parameters[key] = v_config["additional_mounts"][$i][key]
+            mount_parameters[key] = v_config["mounts"][$i][key]
           end
         }
 
         unless mount_parameters["host"].nil? and mount_parameters["client"].nil?
-          puts("mounting dir with parameters: #{mount_parameters}")
+          puts("Mount parameters: #{mount_parameters}")
           config.vm.synced_folder mount_parameters["host"], mount_parameters["client"], owner: mount_parameters["owner"],
                                   group: mount_parameters["group"], :mount_options => ["uid=#{mount_parameters["uid"]},gid=#{mount_parameters["gid"]}"]
         end
+
+        unless mount_parameters["loop_mount"].nil?
+          loop_mounts << "#{mount_parameters["client"]}|#{mount_parameters["loop_mount"]}"
+        end
+
         $i +=1
       end
     end
+    config.vm.provision "shell", path: "mount.bash", args: loop_mounts
 
     # Disable the new default behavior introduced in Vagrant 1.7, to
     # ensure that all Vagrant machines will use the same SSH key pair.
@@ -98,7 +106,7 @@ Vagrant.configure("2") do |config|
     # added by default ansible
     config.ssh.insert_key = false
 
-    config.vm.provision "shell", path: "setup.bash"
+    # config.vm.provision "shell", path: "setup.bash"
 
 
 
