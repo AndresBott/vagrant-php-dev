@@ -1,4 +1,12 @@
 ---
 machine_name: php-dev
-src_fir: ./shared
-
+main_home_mount: ./shared
+additional_mounts:
+#  - host: ../src
+#    client: public_html/wp-data/themes/my_theme
+##    uid: 1100 # default
+##    gid: 1100 #default
+##    owner: web #defautl
+##    group: web #default
+#
+#

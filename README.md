@@ -1,3 +1,8 @@
+#About
+this vagrant project is intended to be added as submodule in a php project for abstracting the developement environment
+
+the goal is that a sql dump should be taken on every vagrant shutdown, 
+and sql restore on every vagrant provision
 # vagrant-php-dev
 
 Vagrant project for creating reusable php dev environment
