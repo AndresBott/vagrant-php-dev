@@ -6,6 +6,11 @@ if [ $1 = "backup" ]; then
 fi
 
 if [ $1 = "restore" ]; then
-    echo "mysql < "$3$2.sqldump""
-    mysql < "$3$2.sqldump"
+    if [ -f "$3$2.sqldump" ]; then
+        echo "mysql < $3$2.sqldump"
+        mysql < "$3$2.sqldump"
+    else
+        echo "WARN: No database to restore"
+    fi
+
 fi
