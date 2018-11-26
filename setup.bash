@@ -24,14 +24,13 @@ sudo mkdir -p /vhosts
 #=============================================================================================================
 USER="web"
 sudo id -u $USER &>/dev/null || useradd -d /vhosts -u 1100 $USER
+sudo usermod -a -G $USER www-data
+
+sudo mkdir -p /vhosts/$USER/public_html
+sudo mkdir -p /vhosts/$USER/temp
 
 sudo chown -R $USER:$USER /vhosts/$USER/
 sudo chmod -R 750 /vhosts/$USER/
-sudo usermod -a -G $USER www-data
-
-
-sudo mkdir -p /vhosts/$USER/public_html
-
 #=============================================================================================================
 # configure php
 #=============================================================================================================
