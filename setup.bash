@@ -9,7 +9,7 @@ sudo chown root:root /root/.bashrc
 ## install apps
 #=============================================================================================================
 sudo apt-get update
-sudo apt-get install -y nginx-full php-fpm joe htop curl php-mysql php-xml php-gd
+sudo apt-get install -y nginx-full php-fpm joe htop curl php-mysql php-xml php-gd php-zip php-curl
 
 ## Clean files
 sudo rm -f /etc/php/7.0/fpm/pool.d/www.conf
