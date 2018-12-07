@@ -22,11 +22,13 @@ the case, use the option loop_mount
 * group: group for which it is mounted
 
 # Database dump
-befor shutting down, suspending or halting a VM a DB dump will be performed
+Before shutting down, suspending or halting a VM a DB dump will be performed
 ````
 mysqldump:
   - db_name: db1
     output: /host_project/db/
+    only_restore: true
 ````
 * db_name: name of the database to dump
 * output: absolute path where the dump will be stored with patterns: "$db_name.sqldump"
+* only_restore: if true this sql file will only run when restoring a VM, useful for creating users etc
