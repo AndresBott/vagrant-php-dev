@@ -9,7 +9,7 @@ sudo chown root:root /root/.bashrc
 ## install apps
 #=============================================================================================================
 sudo apt-get update
-sudo apt-get install -y nginx-full php-fpm joe htop curl php-mysql php-xml php-gd php-zip php-curl
+sudo apt-get install -y nginx-full php-fpm joe htop curl php-mysql php-xml php-gd php-zip php-curl php-sqlite3
 
 ## Clean files
 sudo rm -f /etc/php/7.0/fpm/pool.d/www.conf
@@ -25,6 +25,8 @@ sudo mkdir -p /vhosts
 USER="web"
 sudo id -u $USER &>/dev/null || useradd -d /vhosts -u 1100 $USER
 sudo usermod -a -G $USER www-data
+sudo usermod -a -G vagrant www-data
+sudo usermod -a -G vagrant $USER
 
 sudo mkdir -p /vhosts/$USER/public_html
 sudo mkdir -p /vhosts/$USER/temp
@@ -41,6 +43,10 @@ else
 fi
 sudo /etc/init.d/php7.0-fpm restart
 
+#TODO: find better location
+sudo mkdir -p /var/$USER/phpSessions
+sudo chown $USER:$USER /var/$USER/phpSessions
+
 
 #=============================================================================================================
 # configure nginx
@@ -55,6 +61,12 @@ sudo ln -sf /etc/nginx/sites-available/nginx-site.conf /etc/nginx/sites-enabled/
 sudo rm -f /etc/nginx/sites-enabled/default
 sudo /etc/init.d/nginx restart
 
+#=============================================================================================================
+# less restrictive dev environment for vagrant user
+#=============================================================================================================
+
+sudo usermod -a -G vagrant www-data
+sudo usermod -a -G vagrant $USER
 #=============================================================================================================
 # configure Mysql
 #=============================================================================================================
