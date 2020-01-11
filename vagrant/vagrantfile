@@ -49,13 +49,22 @@ Vagrant.configure("2") do |config|
     #config.vm.network "public_network"
 
     #===========================================================================================================
+    # Mount mysql shared folder
+    #===========================================================================================================
+    vagrant_mysql_dump_path = "/host_mysql_dumps"
+    unless v_config["mysql_mount"].nil?
+      puts("Mount mysql shared folder: #{v_config["mysql_mount"]}")
+      config.vm.synced_folder v_config["mysql_mount"], vagrant_mysql_dump_path,
+                              owner: "vagrant",
+                              group: "vagrant",
+                              :mount_options => ["uid=1000,gid=1000"]
+    end
+
+    #===========================================================================================================
     # Mount folders
     #===========================================================================================================
-    # config.vm.synced_folder v_config["main_home_mount"], "/host_project", owner: "web", group: "web", :mount_options => ["uid=1100,gid=1100"]
-
+    #
     vagrant_project = "/vhosts/vagrant/www"
-
-    loop_mounts = []
     if(v_config["mounts"].kind_of?(Array))
       $i = 0
       while $i < v_config["mounts"].length  do
@@ -112,37 +121,45 @@ Vagrant.configure("2") do |config|
         while $i < v_config["mysqldump"].length  do
             puts("Used Databases: #{v_config["mysqldump"][$i]}")
 
-            if (v_config["mysqldump"][$i]["only_restore"] )
-                only_restore = "only_restore"
-            else
-                only_restore = "restore_and_backup"
-            end
-
-            config.trigger.before [:destroy, :halt, :suspend] do |trigger|
-                trigger.info = "Dump Database"
-                trigger.run_remote = {path: "dump_db.bash",args: [
-                    "backup",
-                    v_config["mysqldump"][$i]["db_name"],
-                    v_config["mysqldump"][$i]["output"],
-                    only_restore
-                ]}
-            end
-
             config.trigger.after [:up,:provision] do |trigger|
               trigger.info = "Restore Database"
-
               trigger.run_remote = {path: "dump_db.bash",args: [
                   "restore",
                   v_config["mysqldump"][$i]["db_name"],
-                  v_config["mysqldump"][$i]["output"],
-                  only_restore
+                  vagrant_mysql_dump_path,
               ]}
             end
 
+            # Handle backup on shutdown
+            if (v_config["mysqldump"][$i]["run_on_shutdown"] )
+                config.trigger.before [:destroy, :halt, :suspend] do |trigger|
+                  trigger.info = "Dump Database"
+                  trigger.run_remote = {path: "dump_db.bash",args: [
+                      "backup",
+                      v_config["mysqldump"][$i]["db_name"],
+                      vagrant_mysql_dump_path,
+                  ]}
+                end
+            end
+
+            # Enable crontab
+            if (v_config["cron_dump"] ) and (v_config["mysqldump"][$i]["run_on_shutdown"] )
+              config.trigger.after [:up,:provision] do |trigger|
+                trigger.info = "Enable cron backup"
+                trigger.run_remote = {path: "dump_db.bash",args: [
+                    "enable-cron-backup",
+                    v_config["mysqldump"][$i]["db_name"],
+                    vagrant_mysql_dump_path,
+                ]}
+              end
+            end
 
             $i +=1
         end
     end
+
+
+
 
 end # End Vagrant configure
 

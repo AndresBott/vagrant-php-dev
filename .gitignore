@@ -3,3 +3,6 @@
 
 *.iml
 .directory
+
+# demo content
+demo-content/db/vagrant.sqldump
