@@ -1,6 +1,6 @@
 # vagrant-php-dev
 
-Vagrant project boilerplate for a lamp dev environment
+Vagrant project for creating reusable php dev environment
 
 This vagrant project is intended to be added as submodule in a php project for abstracting the development environment
 
@@ -8,7 +8,7 @@ the goal is that a sql dump should be taken on every vagrant shutdown,
 and sql restore on every vagrant provision.
 
 # Install
-Add vagrant folder in your php project and then modify vagrantConfig.yaml according your needs.
+Add this project as a submodule or subfolder in your php project and then modify vagrantConfig.yaml according your needs.
 
 # config
 The vagrantlile has been modified so that Vagrant file will check for ../vagrantConfig.yaml before 

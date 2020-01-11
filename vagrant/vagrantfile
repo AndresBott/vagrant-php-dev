@@ -2,12 +2,12 @@
 # vi: set ft=ruby :
 require "yaml"
 
-if(File.exist?("../vagrantConfig.yaml"))
-  puts 'loading ../vagrantConfig.yaml'
-  v_config = YAML.load_file("../vagrantConfig.yaml")
-else
+if(File.exist?("./vagrantConfig.yaml"))
   puts 'loading ./vagrantConfig.yaml'
-  v_config = YAML.load_file("vagrantConfig.yaml")
+  v_config = YAML.load_file("./vagrantConfig.yaml")
+else
+  puts './vagrantConfig.yaml not found, exiting'
+  exit
 end
 
 
@@ -33,16 +33,17 @@ Vagrant.configure("2") do |config|
         end
     end
 
+    #===========================================================================================================
+    # Network settings
+    #===========================================================================================================
+
     # Create a forwarded port mapping which allows access to a specific port
     # within the machine from a port on the host machine. In the example below,
     # accessing "localhost:8080" will access port 80 on the guest machine.
     # NOTE: This will enable public access to the opened port
     # config.vm.network "forwarded_port", guest: 80, host: 8080
 
-    #===========================================================================================================
-    # Network settings
-    #===========================================================================================================
-    config.vm.network "forwarded_port", guest: 8080, host: 8080
+    config.vm.network "forwarded_port", guest: 8080, host: v_config["vagrant_port"]
     config.vm.network :forwarded_port, guest: 22, host: 2222, id: "ssh", auto_correct: true
 
     #config.vm.network "public_network"
@@ -52,45 +53,40 @@ Vagrant.configure("2") do |config|
     #===========================================================================================================
     # config.vm.synced_folder v_config["main_home_mount"], "/host_project", owner: "web", group: "web", :mount_options => ["uid=1100,gid=1100"]
 
+    vagrant_project = "/vhosts/vagrant/www"
+
     loop_mounts = []
     if(v_config["mounts"].kind_of?(Array))
       $i = 0
       while $i < v_config["mounts"].length  do
         mount_defaults = {
             "host"=> nil,
-            "client"=>nil,
-            "loop_mount"=>nil,
-            "uid"=>1000,
-            "gid"=>1000,
-            "owner"=>"vagrant",
-            "group"=>"vagrant"
+            "vagrant"=> nil,
         }
+
+        # overwrite the defaults with defined values
         mount_parameters={}
-        mount_defaults.each { |key,val|
 
-          if (v_config["mounts"][$i][key].nil?)
-            mount_parameters[key] = val
-          else
-            mount_parameters[key] = v_config["mounts"][$i][key]
-          end
-        }
+        mount_parameters["host"] = v_config["mounts"][$i]["host"]
+        mount_parameters["vagrant"] = vagrant_project+v_config["mounts"][$i]["vagrant"]
 
-        unless mount_parameters["host"].nil? and mount_parameters["client"].nil?
+
+
+        unless mount_parameters["host"].nil? and mount_parameters["vagrant"].nil?
           puts("Mount parameters: #{mount_parameters}")
-          config.vm.synced_folder mount_parameters["host"], mount_parameters["client"],
-                                  owner: mount_parameters["owner"],
-                                  group: mount_parameters["group"],
-                                  :mount_options => ["uid=#{mount_parameters["uid"]},gid=#{mount_parameters["gid"]}"]
+          config.vm.synced_folder mount_parameters["host"], mount_parameters["vagrant"],
+                                  owner: "vagrant",
+                                  group: "vagrant",
+                                  :mount_options => ["uid=1000,gid=1000"]
         end
 
-        unless mount_parameters["loop_mount"].nil?
-          loop_mounts << "#{mount_parameters["client"]}|#{mount_parameters["loop_mount"]}"
-        end
+
 
         $i +=1
       end
     end
-    config.vm.provision "shell", path: "mount.bash", args: loop_mounts
+
+    #config.vm.provision "shell", path: "mount.bash", args: loop_mounts
 
     #===========================================================================================================
     # SSH
@@ -110,17 +106,18 @@ Vagrant.configure("2") do |config|
     #===========================================================================================================
     # Take a mysql dump before shutting down the VM and restore after up
     #===========================================================================================================
+
     if(v_config["mysqldump"].kind_of?(Array))
         $i = 0
         while $i < v_config["mysqldump"].length  do
             puts("Used Databases: #{v_config["mysqldump"][$i]}")
-            
+
             if (v_config["mysqldump"][$i]["only_restore"] )
                 only_restore = "only_restore"
             else
                 only_restore = "restore_and_backup"
             end
-                
+
             config.trigger.before [:destroy, :halt, :suspend] do |trigger|
                 trigger.info = "Dump Database"
                 trigger.run_remote = {path: "dump_db.bash",args: [
@@ -132,9 +129,8 @@ Vagrant.configure("2") do |config|
             end
 
             config.trigger.after [:up,:provision] do |trigger|
-              trigger.info = "Dump Database"
+              trigger.info = "Restore Database"
 
-              
               trigger.run_remote = {path: "dump_db.bash",args: [
                   "restore",
                   v_config["mysqldump"][$i]["db_name"],

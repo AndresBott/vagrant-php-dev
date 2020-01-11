@@ -1,0 +1,30 @@
+---
+machine_name: andresbott-web
+mounts:
+  - host: ../guest-root
+    client: /host_project
+    loop_mount: /vhosts/web
+    uid: 1100
+    gid: 1100
+    owner: web
+    group: web
+
+  - host: ../wp-themes/andresbott2020/theme
+    client: /host_theme_andresbott
+    loop_mount: /vhosts/web/public_html/wp-content/themes/andresbott2020
+    uid: 1100
+    gid: 1100
+    owner: web
+    group: web
+    
+mysqldump:
+
+  - db_name: prepare_database # creates the database and the DB user on start
+    output: /host_project/db/
+    only_restore: true
+
+  - db_name: andresbott
+    output: /host_project/db/
+
+
+

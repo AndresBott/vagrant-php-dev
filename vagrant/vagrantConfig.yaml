@@ -1,0 +1,22 @@
+---
+vagrant_port: 8080
+machine_name: vagrant-php-dev
+app_provision: wordpress.sh
+mounts:
+  - host: ../demo-content/vagrant-web
+    vagrant: /
+  - host: ../demo-content/public_html
+    vagrant: /public_html
+  - host: ../demo-content/subdir-content
+    vagrant: /public_html/subdir
+
+mysqldump:
+  - file: ../demo-content/db/prepare.sqldump
+    output: /host_project/db
+    only_restore: true
+
+  - db_name: db2
+    output: /host_project/db
+
+
+
