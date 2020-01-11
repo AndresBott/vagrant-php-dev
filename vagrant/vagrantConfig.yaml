@@ -1,0 +1,33 @@
+---
+# Host port to access the environment
+vagrant_port: 8080
+
+# Machine name in virtual box
+machine_name: vagrant-php-dev
+
+# Additional provisioners to install some things on firs run
+app_provision: wordpress.sh #
+
+# mounted folders in the vagrant VM
+mounts:
+  - host: ../demo-content/vagrant-web
+    vagrant: /
+
+  - host: ../demo-content/public_html
+    vagrant: /public_html
+
+  - host: ../demo-content/subdir-content
+    vagrant: /public_html/subdir
+
+# path on the host where the mysql dumps will be created
+mysql_mount: ../demo-content/db
+# add a cron job every 10 min to dump the database
+cron_dump: true
+# mysql dump files
+mysqldump:
+  - db_name: prepare
+    run_on_shutdown: false
+
+  - db_name: vagrant
+    run_on_shutdown: true
+

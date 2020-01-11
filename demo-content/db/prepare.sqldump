@@ -1,0 +1,4 @@
+CREATE DATABASE IF NOT EXISTS vagrant;
+CREATE USER IF NOT EXISTS 'vagrant'@'localhost' IDENTIFIED BY 'vagrant';
+GRANT ALL PRIVILEGES ON vagrant.* TO 'vagrant'@'localhost';
+FLUSH PRIVILEGES

@@ -5,6 +5,9 @@
 sudo cp /vagrant/rootbashrc /root/.bashrc
 sudo chown root:root /root/.bashrc
 
+sudo cp /vagrant/vagrantbashrc /home/vagrant/.bashrc
+sudo chown vagrant:vagrant /home/vagrant/.bashrc
+
 #=============================================================================================================
 ## install apps
 #=============================================================================================================
@@ -13,8 +16,6 @@ sudo apt-get install -y nginx-full php-fpm joe htop curl php-mysql php-xml php-g
 
 ## Clean files
 sudo rm -f /etc/php/7.0/fpm/pool.d/www.conf
-sudo rm -f /etc/php/7.0/fpm/pool.d/phpuser1-pool.conf
-
 
 ## create vhost dir and user
 sudo mkdir -p /vhosts
@@ -22,8 +23,8 @@ sudo mkdir -p /vhosts
 #=============================================================================================================
 # Create user
 #=============================================================================================================
-USER="web"
-sudo id -u $USER &>/dev/null || useradd -d /vhosts -u 1100 $USER
+USER="vagrant"
+sudo id -u $USER &>/dev/null || useradd -d /vhosts -u 1000 $USER
 sudo usermod -a -G $USER www-data
 sudo usermod -a -G vagrant www-data
 sudo usermod -a -G vagrant $USER
@@ -43,7 +44,6 @@ else
 fi
 sudo /etc/init.d/php7.0-fpm restart
 
-#TODO: find better location
 sudo mkdir -p /var/$USER/phpSessions
 sudo chown $USER:$USER /var/$USER/phpSessions
 
@@ -64,9 +64,9 @@ sudo /etc/init.d/nginx restart
 #=============================================================================================================
 # less restrictive dev environment for vagrant user
 #=============================================================================================================
-
 sudo usermod -a -G vagrant www-data
 sudo usermod -a -G vagrant $USER
+
 #=============================================================================================================
 # configure Mysql
 #=============================================================================================================
